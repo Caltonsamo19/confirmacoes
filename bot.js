@@ -24,6 +24,10 @@ const GRUPOS = {
     'venda': {
         id: '258840161370-1471468657@g.us',
         nome: 'Venda Automática Megas 24/7'
+    },
+     'fornecedor': {
+        id: '120363419652375064@g.us',
+        nome: 'Net Fornecedor V'
     }
 };
 
@@ -340,4 +344,5 @@ process.on('uncaughtException', (error) => {
 });
 
 // Iniciar o bot
+
 iniciarBot();
