@@ -28,6 +28,10 @@ const GRUPOS = {
      'fornecedor': {
         id: '120363419652375064@g.us',
         nome: 'Net Fornecedor V'
+    },
+     'saldo': {
+        id: '120363419741642342@g.us',
+        nome: 'Only Saldo'
     }
 };
 
