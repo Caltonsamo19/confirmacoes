@@ -350,3 +350,4 @@ process.on('uncaughtException', (error) => {
 // Iniciar o bot
 
 iniciarBot();
+
