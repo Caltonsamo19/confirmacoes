@@ -33,7 +33,7 @@ const GRUPOS = {
         id: '120363419741642342@g.us',
         nome: 'Only Saldo'
     },
-     'venda automatico': {
+     'automatico': {
         id: '120363228868368923@g.us',
         nome: 'Venda Automatico Megas'
     }
@@ -354,3 +354,4 @@ process.on('uncaughtException', (error) => {
 // Iniciar o bot
 
 iniciarBot();
+
