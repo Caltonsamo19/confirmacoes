@@ -1,3 +1,4 @@
+
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const express = require('express');
 const qrcode = require('qrcode-terminal');
@@ -36,6 +37,10 @@ const GRUPOS = {
      'automatico': {
         id: '120363228868368923@g.us',
         nome: 'Venda Automatico Megas'
+    },
+     'megas': {
+        id: '120363418801452164@g.us',
+        nome: 'MNG Megas'
     }
 };
 
