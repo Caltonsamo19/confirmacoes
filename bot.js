@@ -83,9 +83,14 @@ const client = new Client({
             '--no-first-run',
             '--no-zygote',
             '--disable-gpu',
-            '--disable-web-security'
+            '--disable-web-security',
+            '--disable-features=VizDisplayCompositor'
         ],
         executablePath: undefined // Deixa o puppeteer escolher automaticamente
+    },
+    webVersionCache: {
+        type: 'remote',
+        remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
     }
 });
 
@@ -118,6 +123,19 @@ client.on('auth_failure', (msg) => {
 client.on('disconnected', (reason) => {
     log('warn', 'Cliente desconectado', reason);
     console.log('⚠️ WhatsApp desconectado:', reason);
+    
+    // Tentar reconectar após um delay
+    setTimeout(() => {
+        log('info', 'Tentando reconectar...');
+        console.log('🔄 Tentando reconectar...');
+        client.initialize().catch(err => {
+            log('error', 'Erro ao reconectar', err.message);
+        });
+    }, 5000);
+});
+
+client.on('loading_screen', (percent, message) => {
+    log('info', `Carregando WhatsApp: ${percent}% - ${message}`);
 });
 
 // Função para encontrar grupo por ID
@@ -140,10 +158,32 @@ async function enviarMensagem(groupId, mensagem) {
 
         log('info', `Enviando mensagem para grupo: ${grupo.nome}`);
         
-        await client.sendMessage(groupId, mensagem);
+        // Verificar se o cliente está pronto
+        if (!client.info) {
+            throw new Error('Cliente WhatsApp não está conectado');
+        }
         
-        log('info', `Mensagem enviada com sucesso para ${grupo.nome}`);
-        return { success: true, grupo: grupo.nome };
+        // Tentar enviar com retry em caso de erro
+        let attempts = 0;
+        const maxAttempts = 3;
+        
+        while (attempts < maxAttempts) {
+            try {
+                await client.sendMessage(groupId, mensagem);
+                log('info', `Mensagem enviada com sucesso para ${grupo.nome}`);
+                return { success: true, grupo: grupo.nome };
+            } catch (sendError) {
+                attempts++;
+                log('warn', `Tentativa ${attempts} falhou: ${sendError.message}`);
+                
+                if (attempts === maxAttempts) {
+                    throw sendError;
+                }
+                
+                // Aguardar antes de tentar novamente
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
         
     } catch (error) {
         log('error', 'Erro ao enviar mensagem', {
@@ -319,13 +359,26 @@ async function iniciarBot() {
             console.log('📡 Aguardando conexão WhatsApp...\n');
         });
         
+        // Configurar timeout para inicialização
+        const initTimeout = setTimeout(() => {
+            log('error', 'Timeout na inicialização do WhatsApp');
+            console.log('❌ Timeout na inicialização - reiniciando...');
+            process.exit(1);
+        }, 120000); // 2 minutos
+        
         // Inicializar WhatsApp
         await client.initialize();
+        clearTimeout(initTimeout);
         
     } catch (error) {
         log('error', 'Erro ao inicializar bot', error.message);
         console.log('❌ Erro ao inicializar:', error.message);
-        process.exit(1);
+        
+        // Aguardar antes de tentar novamente
+        setTimeout(() => {
+            log('info', 'Tentando reinicializar...');
+            iniciarBot();
+        }, 10000);
     }
 }
 
