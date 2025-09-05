@@ -39,7 +39,7 @@ const GRUPOS = {
         nome: 'Venda Automatico Megas'
     },
      'megas': {
-        id: '120363022366545020@g.us',
+        id: '120363418801452164@g.us',
         nome: 'MNG Megas'
     }
 };
@@ -84,14 +84,25 @@ const client = new Client({
             '--no-zygote',
             '--disable-gpu',
             '--disable-web-security',
-            '--disable-features=VizDisplayCompositor'
+            '--disable-features=VizDisplayCompositor',
+            '--disable-blink-features=AutomationControlled',
+            '--disable-extensions',
+            '--disable-plugins',
+            '--disable-images',
+            '--disable-javascript',
+            '--disable-default-apps',
+            '--disable-background-timer-throttling',
+            '--disable-backgrounding-occluded-windows',
+            '--disable-renderer-backgrounding',
+            '--disable-background-networking'
         ],
         executablePath: undefined // Deixa o puppeteer escolher automaticamente
     },
     webVersionCache: {
         type: 'remote',
         remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
-    }
+    },
+    webVersion: '2.2412.54'
 });
 
 // Eventos do WhatsApp
@@ -102,13 +113,28 @@ client.on('qr', (qr) => {
     console.log('\n📱 Abra o WhatsApp > Menu (3 pontos) > Dispositivos conectados > Conectar dispositivo');
 });
 
-client.on('ready', () => {
-    log('info', 'Bot conectado e pronto para uso');
-    console.log('\n✅ BOT WHATSAPP CONECTADO COM SUCESSO!');
-    console.log('🔗 Endpoints disponíveis:');
-    console.log(`   POST http://localhost:${PORT}/enviar`);
-    console.log(`   GET  http://localhost:${PORT}/grupos`);
-    console.log(`   GET  http://localhost:${PORT}/status`);
+client.on('ready', async () => {
+    try {
+        log('info', 'Bot conectado e pronto para uso');
+        console.log('\n✅ BOT WHATSAPP CONECTADO COM SUCESSO!');
+        
+        // Verificar se o cliente está realmente pronto
+        const info = client.info;
+        if (info) {
+            log('info', 'Informações do cliente obtidas', {
+                wid: info.wid?.user,
+                platform: info.platform,
+                battery: info.battery
+            });
+        }
+        
+        console.log('🔗 Endpoints disponíveis:');
+        console.log(`   POST http://localhost:${PORT}/enviar`);
+        console.log(`   GET  http://localhost:${PORT}/grupos`);
+        console.log(`   GET  http://localhost:${PORT}/status`);
+    } catch (error) {
+        log('error', 'Erro no evento ready', error.message);
+    }
 });
 
 client.on('authenticated', () => {
@@ -359,16 +385,24 @@ async function iniciarBot() {
             console.log('📡 Aguardando conexão WhatsApp...\n');
         });
         
-        // Configurar timeout para inicialização
+        // Configurar timeout para inicialização (aumentado para 3 minutos)
         const initTimeout = setTimeout(() => {
             log('error', 'Timeout na inicialização do WhatsApp');
-            console.log('❌ Timeout na inicialização - reiniciando...');
-            process.exit(1);
-        }, 120000); // 2 minutos
+            console.log('❌ Timeout na inicialização - tentando novamente...');
+            client.destroy().then(() => {
+                setTimeout(iniciarBot, 5000);
+            }).catch(() => {
+                setTimeout(iniciarBot, 5000);
+            });
+        }, 180000); // 3 minutos
+        
+        // Adicionar listener para limpar timeout quando ready
+        client.once('ready', () => {
+            clearTimeout(initTimeout);
+        });
         
         // Inicializar WhatsApp
         await client.initialize();
-        clearTimeout(initTimeout);
         
     } catch (error) {
         log('error', 'Erro ao inicializar bot', error.message);
@@ -412,5 +446,4 @@ process.on('uncaughtException', (error) => {
 // Iniciar o bot
 
 iniciarBot();
-
 
