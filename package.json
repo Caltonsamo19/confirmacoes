@@ -5,7 +5,8 @@
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js",
-    "dev": "nodemon bot.js"
+    "dev": "nodemon bot.js",
+    "clean": "rm -rf .wwebjs_auth .wwebjs_cache node_modules package-lock.json"
   },
   "keywords": [
     "whatsapp",
@@ -18,6 +19,7 @@
   "license": "MIT",
   "dependencies": {
     "whatsapp-web.js": "github:BenyFilho/whatsapp-web.js#fix_event_ready_again",
+    "puppeteer": "^19.11.1",
     "qrcode-terminal": "^0.12.0",
     "express": "^4.18.2",
     "axios": "^1.6.0",
