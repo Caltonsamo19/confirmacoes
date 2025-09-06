@@ -18,7 +18,7 @@
   "author": "Seu Nome",
   "license": "MIT",
   "dependencies": {
-    "whatsapp-web.js": "github:BenyFilho/whatsapp-web.js#fix_event_ready_again",
+    "whatsapp-web.js": "^1.33.3",
     "puppeteer": "^19.11.1",
     "qrcode-terminal": "^0.12.0",
     "express": "^4.18.2",
