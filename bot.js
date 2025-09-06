@@ -85,24 +85,14 @@ const client = new Client({
             '--disable-gpu',
             '--disable-web-security',
             '--disable-features=VizDisplayCompositor',
-            '--disable-blink-features=AutomationControlled',
-            '--disable-extensions',
-            '--disable-plugins',
-            '--disable-images',
-            '--disable-javascript',
-            '--disable-default-apps',
-            '--disable-background-timer-throttling',
-            '--disable-backgrounding-occluded-windows',
-            '--disable-renderer-backgrounding',
-            '--disable-background-networking'
+            '--disable-blink-features=AutomationControlled'
         ],
         executablePath: undefined // Deixa o puppeteer escolher automaticamente
     },
     webVersionCache: {
         type: 'remote',
         remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
-    },
-    webVersion: '2.2412.54'
+    }
 });
 
 // Eventos do WhatsApp
